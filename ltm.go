@@ -352,6 +352,7 @@ type Nodes struct {
 type Node struct {
 	Name            string     `json:"name,omitempty"`
 	AppService      string     `json:"appService,omitempty"`
+	Description     string     `json:"description,omitempty"`
 	Partition       string     `json:"partition,omitempty"`
 	FullPath        string     `json:"fullPath,omitempty"`
 	Generation      int        `json:"generation,omitempty"`
