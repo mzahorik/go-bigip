@@ -483,23 +483,24 @@ type poolMembers struct {
 // Pool Member contains information about each individual member in a pool. You can use all
 // of these fields when modifying a pool member.
 type PoolMember struct {
-	Name            string `json:"name,omitempty"`
-	Description     string `json:"description,omitempty"`
-	AppService      string `json:"appService,omitempty"`
-	Partition       string `json:"partition,omitempty"`
-	FullPath        string `json:"fullPath,omitempty"`
-	Generation      int    `json:"generation,omitempty"`
-	Address         string `json:"address,omitempty"`
-	ConnectionLimit int    `json:"connectionLimit,omitempty"`
-	DynamicRatio    int    `json:"dynamicRatio,omitempty"`
-	InheritProfile  string `json:"inheritProfile,omitempty"`
-	Logging         string `json:"logging,omitempty"`
-	Monitor         string `json:"monitor,omitempty"`
-	PriorityGroup   int    `json:"priorityGroup,omitempty"`
-	RateLimit       string `json:"rateLimit,omitempty"`
-	Ratio           int    `json:"ratio,omitempty"`
-	Session         string `json:"session,omitempty"`
-	State           string `json:"state,omitempty"`
+	Name            string     `json:"name,omitempty"`
+	Description     string     `json:"description,omitempty"`
+	AppService      string     `json:"appService,omitempty"`
+	Partition       string     `json:"partition,omitempty"`
+	FullPath        string     `json:"fullPath,omitempty"`
+	Generation      int        `json:"generation,omitempty"`
+	Address         string     `json:"address,omitempty"`
+	ConnectionLimit int        `json:"connectionLimit,omitempty"`
+	DynamicRatio    int        `json:"dynamicRatio,omitempty"`
+	InheritProfile  string     `json:"inheritProfile,omitempty"`
+	Logging         string     `json:"logging,omitempty"`
+	Metadata        []Metadata `json:"metadata,omitempty"`
+	Monitor         string     `json:"monitor,omitempty"`
+	PriorityGroup   int        `json:"priorityGroup,omitempty"`
+	RateLimit       string     `json:"rateLimit,omitempty"`
+	Ratio           int        `json:"ratio,omitempty"`
+	Session         string     `json:"session,omitempty"`
+	State           string     `json:"state,omitempty"`
 }
 
 // VirtualServers contains a list of all virtual servers on the BIG-IP system.
