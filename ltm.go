@@ -1524,6 +1524,11 @@ func (b *BigIP) Nodes() (*Nodes, error) {
 	return &nodes, nil
 }
 
+// AddNode creates a new node on the BIG-IP system.
+func (b *BigIP) AddNode(config *Node) error {
+	return b.post(config, uriLtm, uriNode)
+}
+
 // CreateNode adds a new node to the BIG-IP system.
 func (b *BigIP) CreateNode(name, address string) error {
 	config := &Node{
