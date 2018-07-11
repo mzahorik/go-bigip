@@ -14,6 +14,12 @@ type Metadata struct {
 	Persist    string `json:"persist,omitempty"`
 }
 
+type Persistence struct {
+	Name       string `json:"name,omitempty"`
+	Partition  string `json:"partition,omitempty"`
+	Default    string `json:"tmDefault,omitempty"`
+}
+
 // ServerSSLProfiles
 // Documentation: https://devcentral.f5.com/wiki/iControlREST.APIRef_tm_ltm_profile_server-ssl.ashx
 
@@ -503,31 +509,33 @@ type VirtualServers struct {
 
 // VirtualServer contains information about each individual virtual server.
 type VirtualServer struct {
-	Name                     string     `json:"name,omitempty"`
-	Partition                string     `json:"partition,omitempty"`
-	FullPath                 string     `json:"fullPath,omitempty"`
-	Generation               int        `json:"generation,omitempty"`
-	AddressStatus            string     `json:"addressStatus,omitempty"`
-	AutoLastHop              string     `json:"autoLastHop,omitempty"`
-	CMPEnabled               string     `json:"cmpEnabled,omitempty"`
-	ConnectionLimit          int        `json:"connectionLimit,omitempty"`
-	Destination              string     `json:"destination,omitempty"`
-	Description              string     `json:"description,omitempty"`
-	Enabled                  bool       `json:"enabled,omitempty"`
-	GTMScore                 int        `json:"gtmScore,omitempty"`
-	IPForward                bool       `json:"ipForward,omitempty"`
-	IPProtocol               string     `json:"ipProtocol,omitempty"`
-	Mask                     string     `json:"mask,omitempty"`
-	Metadata                 []Metadata `json:"metadata,omitempty"`
-	Mirror                   string     `json:"mirror,omitempty"`
-	MobileAppTunnel          string     `json:"mobileAppTunnel,omitempty"`
-	NAT64                    string     `json:"nat64,omitempty"`
-	Pool                     string     `json:"pool,omitempty"`
-	RateLimit                string     `json:"rateLimit,omitempty"`
-	RateLimitDestinationMask int        `json:"rateLimitDstMask,omitempty"`
-	RateLimitMode            string     `json:"rateLimitMode,omitempty"`
-	RateLimitSourceMask      int        `json:"rateLimitSrcMask,omitempty"`
-	Source                   string     `json:"source,omitempty"`
+	Name                     string        `json:"name,omitempty"`
+	Partition                string        `json:"partition,omitempty"`
+	FullPath                 string        `json:"fullPath,omitempty"`
+	Generation               int           `json:"generation,omitempty"`
+	AddressStatus            string        `json:"addressStatus,omitempty"`
+	AutoLastHop              string        `json:"autoLastHop,omitempty"`
+	CMPEnabled               string        `json:"cmpEnabled,omitempty"`
+	ConnectionLimit          int           `json:"connectionLimit,omitempty"`
+	Destination              string        `json:"destination,omitempty"`
+	Description              string        `json:"description,omitempty"`
+	Enabled                  bool          `json:"enabled,omitempty"`
+	FallbackPersistence      string        `json:"fallbackPersistence,omitempty"`
+	GTMScore                 int           `json:"gtmScore,omitempty"`
+	IPForward                bool          `json:"ipForward,omitempty"`
+	IPProtocol               string        `json:"ipProtocol,omitempty"`
+	Mask                     string        `json:"mask,omitempty"`
+	Metadata                 []Metadata    `json:"metadata,omitempty"`
+	Mirror                   string        `json:"mirror,omitempty"`
+	MobileAppTunnel          string        `json:"mobileAppTunnel,omitempty"`
+	NAT64                    string        `json:"nat64,omitempty"`
+	Persistence		 []Persistence `json:"persist,omitempty"`
+	Pool                     string        `json:"pool,omitempty"`
+	RateLimit                string        `json:"rateLimit,omitempty"`
+	RateLimitDestinationMask int           `json:"rateLimitDstMask,omitempty"`
+	RateLimitMode            string        `json:"rateLimitMode,omitempty"`
+	RateLimitSourceMask      int           `json:"rateLimitSrcMask,omitempty"`
+	Source                   string        `json:"source,omitempty"`
 	SourceAddressTranslation struct {
 		Type string `json:"type,omitempty"`
 		Pool string `json:"pool,omitempty"`
@@ -1791,6 +1799,16 @@ func (b *BigIP) ModifyPool(name string, config *Pool) error {
 
 // VirtualServers returns a list of virtual servers.
 func (b *BigIP) VirtualServers() (*VirtualServers, error) {
+	var vs VirtualServers
+	err, _ := b.getForEntity(&vs, uriLtm, uriVirtual)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vs, nil
+}
+
+func (b *BigIP) VirtualServersForPartition(partition string) (*VirtualServers, error) {
 	var vs VirtualServers
 	err, _ := b.getForEntity(&vs, uriLtm, uriVirtual)
 	if err != nil {
