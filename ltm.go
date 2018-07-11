@@ -8,10 +8,32 @@ import (
 
 // Metadata can be used on (most) objects to attach arbitrary name/value pairs.
 type Metadata struct {
+	AppService string
+	Name       string
+	Value      string
+	Persist    bool
+}
+
+type MetadataDTO struct {
 	AppService string `json:"appService,omitempty"`
 	Name       string `json:"name,omitempty"`
 	Value      string `json:"value,omitempty"`
-	Persist    bool   `json:"persist,omitempty"`
+	Persist    bool   `json:"persist,omitempty" bool:"enabled"`
+}
+
+func (p *Metadata) MarshalJSON() ([]byte, error) {
+        var dto MetadataDTO
+        marshal(&dto, p)
+        return json.Marshal(dto)
+}
+
+func (p *Metadata) UnmarshalJSON(b []byte) error {
+        var dto MetadataDTO
+        err := json.Unmarshal(b, &dto)
+        if err != nil {
+                return err
+        }
+        return marshal(p, &dto)
 }
 
 // ServerSSLProfiles
