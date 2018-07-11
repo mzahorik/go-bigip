@@ -11,7 +11,7 @@ type Metadata struct {
 	AppService string `json:"appService,omitempty"`
 	Name       string `json:"name,omitempty"`
 	Value      string `json:"value,omitempty"`
-	Persist    bool   `json:"persist,omitempty"`
+	Persist    string `json:"persist,omitempty"`
 }
 
 // ServerSSLProfiles
