@@ -1666,7 +1666,8 @@ func (b *BigIP) PoolsForPartition(partition string) (*Pools, error) {
 	if partition == "" {
 		return nil, fmt.Errorf("Partition cannot be empty")
 	}
-	err, _ := b.getForEntity(&pools, uriLtm, uriPool, partitionFilterUri, partition)
+	filteredUri := partitionFilterUri + partition
+	err, _ := b.getForEntity(&pools, uriLtm, uriPool, filteredUri)
 	if err != nil {
 		return nil, err
 	}
@@ -1987,6 +1988,41 @@ func (b *BigIP) Monitors() ([]Monitor, error) {
 	for _, name := range monitorUris {
 		var m Monitors
 		err, _ := b.getForEntity(&m, uriLtm, uriMonitor, name)
+		if err != nil {
+			return nil, err
+		}
+		for _, monitor := range m.Monitors {
+			monitor.MonitorType = name
+			monitors = append(monitors, monitor)
+		}
+	}
+
+	return monitors, nil
+}
+
+func (b *BigIP) MonitorsForPartition(partition string) ([]Monitor, error) {
+	var monitors []Monitor
+	monitorUris := []string{
+		"gateway-icmp",
+		"http",
+		"https",
+		"icmp",
+		"inband",
+		"mysql",
+		"postgresql",
+		"tcp",
+		"udp",
+	}
+
+	if partition == "" {
+		return nil, fmt.Errorf("Partition cannot be empty")
+	}
+
+	for _, name := range monitorUris {
+		var m Monitors
+		filteredUri := partitionFilterUri + partition
+
+		err, _ := b.getForEntity(&m, uriLtm, uriMonitor, name, filteredUri)
 		if err != nil {
 			return nil, err
 		}
