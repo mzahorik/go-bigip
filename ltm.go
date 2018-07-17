@@ -1526,6 +1526,22 @@ func (b *BigIP) Nodes() (*Nodes, error) {
 	return &nodes, nil
 }
 
+// Nodes returns a list of nodes.
+func (b *BigIP) NodesForPartition(partition string) (*Nodes, error) {
+	var nodes Nodes
+	if partition == "" {
+		return nil, fmt.Errorf("Partition cannot be empty")
+	}
+
+	filteredUri := partitionFilterUri + partition
+	err, _ := b.getForEntity(&nodes, uriLtm, uriNode, filteredUri)
+	if err != nil {
+		return nil, err
+	}
+
+	return &nodes, nil
+}
+
 // AddNode creates a new node on the BIG-IP system.
 func (b *BigIP) AddNode(config *Node) error {
 	return b.post(config, uriLtm, uriNode)
