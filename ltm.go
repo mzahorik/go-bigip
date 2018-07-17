@@ -1837,7 +1837,8 @@ func (b *BigIP) VirtualServersForPartition(partition string) (*VirtualServers, e
 	if partition == "" {
 		return nil, fmt.Errorf("Partition cannot be empty")
 	}
-	err, _ := b.getForEntity(&vs, uriLtm, uriVirtual, partitionFilterUri, partition)
+	filteredUri := partitionFilterUri + partition
+	err, _ := b.getForEntity(&vs, uriLtm, uriVirtual, filteredUri)
 	if err != nil {
 		return nil, err
 	}
