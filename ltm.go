@@ -1064,6 +1064,7 @@ const (
 	uriUdp             = "udp"
 	uriVirtual         = "virtual"
 	uriVirtualAddress  = "virtual-address"
+	partitionFilterUri = "?$filter=partition+eq+"
 	ENABLED            = "enable"
 	DISABLED           = "disable"
 	CONTEXT_SERVER     = "serverside"
@@ -1659,6 +1660,20 @@ func (b *BigIP) Pools() (*Pools, error) {
 	return &pools, nil
 }
 
+// Pools returns a list of pools.
+func (b *BigIP) PoolsForPartition(partition string) (*Pools, error) {
+	var pools Pools
+	if partition == "" {
+		return nil, fmt.Errorf("Partition cannot be empty")
+	}
+	err, _ := b.getForEntity(&pools, uriLtm, uriPool, partitionFilterUri, partition)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pools, nil
+}
+
 // PoolMembers returns a list of pool members for the given pool.
 func (b *BigIP) PoolMembers(name string) (*PoolMembers, error) {
 	var poolMembers PoolMembers
@@ -1819,11 +1834,10 @@ func (b *BigIP) VirtualServers() (*VirtualServers, error) {
 // F5 prior to returning results
 func (b *BigIP) VirtualServersForPartition(partition string) (*VirtualServers, error) {
 	var vs VirtualServers
-	filteredUri := uriVirtual
-	if partition != "" {
-		filteredUri = filteredUri + "?$filter=partition+eq+" + partition
+	if partition == "" {
+		return nil, fmt.Errorf("Partition cannot be empty")
 	}
-	err, _ := b.getForEntity(&vs, uriLtm, filteredUri)
+	err, _ := b.getForEntity(&vs, uriLtm, uriVirtual, partitionFilterUri, partition)
 	if err != nil {
 		return nil, err
 	}
