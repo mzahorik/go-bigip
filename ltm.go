@@ -1815,9 +1815,15 @@ func (b *BigIP) VirtualServers() (*VirtualServers, error) {
 	return &vs, nil
 }
 
+// Similar to VirtualServers(), but will apply a partition filter on the
+// F5 prior to returning results
 func (b *BigIP) VirtualServersForPartition(partition string) (*VirtualServers, error) {
 	var vs VirtualServers
-	err, _ := b.getForEntity(&vs, uriLtm, uriVirtual)
+	filteredUri := uriVirtual
+	if partition != "" {
+		filteredUri = filteredUri + "?$filter=partition+eq+" + partition
+	}
+	err, _ := b.getForEntity(&vs, uriLtm, filteredUri)
 	if err != nil {
 		return nil, err
 	}
