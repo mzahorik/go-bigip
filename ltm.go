@@ -552,18 +552,17 @@ type VirtualServer struct {
 		Type string `json:"type,omitempty"`
 		Pool string `json:"pool,omitempty"`
 	} `json:"sourceAddressTranslation,omitempty"`
-	SourcePort       string     `json:"sourcePort,omitempty"`
-	SYNCookieStatus  string     `json:"synCookieStatus,omitempty"`
-	TranslateAddress string     `json:"translateAddress,omitempty"`
-	TranslatePort    string     `json:"translatePort,omitempty"`
-	VlansEnabled     bool       `json:"vlansEnabled,omitempty"`
-	VlansDisabled    bool       `json:"vlansDisabled,omitempty"`
-	VSIndex          int        `json:"vsIndex,omitempty"`
-	Vlans            []string   `json:"vlans,omitempty"`
-	Rules            []string   `json:"rules,omitempty"`
-	Profiles         []Profile  `json:"profiles,omitempty"`
-	Policies         []string   `json:"policies,omitempty"`
-	Metadata         []Metadata `json:"metadata,omitempty"`
+	SourcePort       string    `json:"sourcePort,omitempty"`
+	SYNCookieStatus  string    `json:"synCookieStatus,omitempty"`
+	TranslateAddress string    `json:"translateAddress,omitempty"`
+	TranslatePort    string    `json:"translatePort,omitempty"`
+	VlansEnabled     bool      `json:"vlansEnabled,omitempty"`
+	VlansDisabled    bool      `json:"vlansDisabled,omitempty"`
+	VSIndex          int       `json:"vsIndex,omitempty"`
+	Vlans            []string  `json:"vlans,omitempty"`
+	Rules            []string  `json:"rules,omitempty"`
+	Profiles         []Profile `json:"profiles,omitempty"`
+	Policies         []string  `json:"policies,omitempty"`
 }
 
 // VirtualAddresses contains a list of all virtual addresses on the BIG-IP system.
