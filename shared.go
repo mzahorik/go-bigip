@@ -39,6 +39,7 @@ const (
 	uriNaptrRecord     = "naptr"
 	uriSrvRecord       = "srv"
 	uriPoolMembers     = "members"
+	partitionFilterUri = "?$filter=partition+eq+"
 	ENABLED            = "enable"
 	DISABLED           = "disable"
 	CONTEXT_SERVER     = "serverside"
