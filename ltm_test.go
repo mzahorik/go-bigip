@@ -100,6 +100,14 @@ func (s *LTMTestSuite) TestModifyVirtualAddress() {
 	assert.Equal(s.T(), "PUT", s.LastRequest.Method)
 }
 
+func (s *LTMTestSuite) TestPatchVirtualAddress() {
+	d := &VirtualAddress{}
+	s.Client.PatchVirtualAddress("address1", d)
+
+	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s/%s", uriLtm, uriVirtualAddress, "address1"), s.LastRequest.URL.Path)
+	assert.Equal(s.T(), "PATCH", s.LastRequest.Method)
+}
+
 func (s *LTMTestSuite) TestGetPolicies() {
 	s.ResponseFunc = func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{
@@ -468,6 +476,30 @@ func (s *LTMTestSuite) TestModifyVirtualServer() {
 
 }
 
+func (s *LTMTestSuite) TestPatchVirtualServer() {
+	vs := &VirtualServer{
+		Name: "test",
+		Profiles: []Profile{
+			Profile{Name: "/Common/tcp", Context: CONTEXT_CLIENT},
+			Profile{Name: "/Common/tcp", Context: CONTEXT_SERVER}},
+		//TODO: test more
+	}
+
+	s.Client.PatchVirtualServer("test", vs)
+
+	assert.Equal(s.T(), "PATCH", s.LastRequest.Method)
+	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s/test", uriLtm, uriVirtual), s.LastRequest.URL.Path)
+	assert.JSONEq(s.T(), `
+	{"name":"test",
+	"sourceAddressTranslation":{},
+	"profiles":[
+		{"name":"/Common/tcp","context":"clientside"},
+		{"name":"/Common/tcp","context":"serverside"}
+	]
+	}`, s.LastRequestBody)
+
+}
+
 func (s *LTMTestSuite) TestDeleteVirtualServer() {
 	s.Client.DeleteVirtualServer("/Common/test-vs")
 
@@ -541,6 +573,205 @@ func (s *LTMTestSuite) TestGetPool() {
 	assert.Equal(s.T(), "Common", p.Partition)
 	assert.Equal(s.T(), "/Common/test-pool", p.FullPath)
 	assert.Equal(s.T(), "/Common/http ", p.Monitor)
+}
+
+func (s *LTMTestSuite) TestVirtuals() {
+	s.ResponseFunc = func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{
+  "kind": "tm:ltm:virtual:virtualcollectionstate",
+  "selfLink": "https://localhost/mgmt/tm/ltm/virtual?ver=12.1.3.7",
+  "items": [
+    {
+      "kind": "tm:ltm:virtual:virtualstate",
+      "name": "test-virtual",
+      "partition": "Common",
+      "fullPath": "/Common/test-virtual",
+      "generation": 1,
+      "selfLink": "https://localhost/mgmt/tm/ltm/virtual/~Common~test-virtual?ver=12.1.3.7",
+      "addressStatus": "yes",
+      "autoLasthop": "enabled",
+      "cmpEnabled": "yes",
+      "connectionLimit": 0,
+      "destination": "/Common/10.1.1.1:8080",
+      "enabled": true,
+      "gtmScore": 0,
+      "ipProtocol": "tcp",
+      "mask": "255.255.255.255",
+      "mirror": "disabled",
+      "mobileAppTunnel": "disabled",
+      "nat64": "disabled",
+      "pool": "/Common/test-pool",
+      "poolReference": {
+        "link": "https://localhost/mgmt/tm/ltm/pool/~Common~test-pool?ver=12.1.3.7"
+      },
+      "rateLimit": "disabled",
+      "rateLimitDstMask": 0,
+      "rateLimitMode": "object",
+      "rateLimitSrcMask": 0,
+      "securityNatPolicy": {
+        "useDevicePolicy": "no",
+        "useRouteDomainPolicy": "no"
+      },
+      "serviceDownImmediateAction": "none",
+      "source": "0.0.0.0/0",
+      "sourceAddressTranslation": {
+        "pool": "/Common/test-snat-pool",
+        "poolReference": {
+          "link": "https://localhost/mgmt/tm/ltm/snatpool/~Common~test-snat-pool?ver=12.1.3.7"
+        },
+        "type": "snat"
+      },
+      "sourcePort": "preserve",
+      "synCookieStatus": "not-activated",
+      "translateAddress": "enabled",
+      "translatePort": "enabled",
+      "vlansDisabled": true,
+      "vsIndex": 1442,
+      "rules": [
+        "/Common/test-irule1",
+        "/Common/test-irule2"
+      ],
+      "rulesReference": [
+        {
+          "link": "https://localhost/mgmt/tm/ltm/rule/~Common~test-irule1?ver=12.1.3.7"
+        },
+        {
+          "link": "https://localhost/mgmt/tm/ltm/rule/~Common~test-irule2?ver=12.1.3.7"
+        }
+      ],
+      "metadata": [
+        {
+          "name": "test-virtual-meta",
+          "persist": "true",
+          "value": "meta"
+        },
+        {
+          "name": "test-virtual-meta2",
+          "persist": "true",
+          "value": "meta2"
+        }
+      ],
+      "persist": [
+        {
+          "name": "source_addr",
+          "partition": "Common",
+          "tmDefault": "yes",
+          "nameReference": {
+            "link": "https://localhost/mgmt/tm/ltm/persistence/source-addr/~Common~source_addr?ver=12.1.3.7"
+          }
+        }
+      ],
+      "policiesReference": {
+        "link": "https://localhost/mgmt/tm/ltm/virtual/~Common~test-virtual/policies?ver=12.1.3.7",
+        "isSubcollection": true
+      },
+      "profilesReference": {
+        "link": "https://localhost/mgmt/tm/ltm/virtual/~Common~test-virtual/profiles?ver=12.1.3.7",
+        "isSubcollection": true
+      }
+    },
+    {
+      "kind": "tm:ltm:virtual:virtualstate",
+      "name": "test-virtual",
+      "partition": "Common",
+      "fullPath": "/Common/test-virtual2",
+      "generation": 1,
+      "selfLink": "https://localhost/mgmt/tm/ltm/virtual2/~Common~test-virtual?ver=12.1.3.7",
+      "addressStatus": "yes",
+      "autoLasthop": "enabled",
+      "cmpEnabled": "yes",
+      "connectionLimit": 0,
+      "destination": "/Common/10.1.1.2:8080",
+      "enabled": true,
+      "gtmScore": 0,
+      "ipProtocol": "tcp",
+      "mask": "255.255.255.255",
+      "mirror": "disabled",
+      "mobileAppTunnel": "disabled",
+      "nat64": "disabled",
+      "pool": "/Common/test-pool2",
+      "poolReference": {
+        "link": "https://localhost/mgmt/tm/ltm/pool/~Common~test-pool2?ver=12.1.3.7"
+      },
+      "rateLimit": "disabled",
+      "rateLimitDstMask": 0,
+      "rateLimitMode": "object",
+      "rateLimitSrcMask": 0,
+      "securityNatPolicy": {
+        "useDevicePolicy": "no",
+        "useRouteDomainPolicy": "no"
+      },
+      "serviceDownImmediateAction": "none",
+      "source": "0.0.0.0/0",
+      "sourceAddressTranslation": {
+        "pool": "/Common/test-snat-pool",
+        "poolReference": {
+          "link": "https://localhost/mgmt/tm/ltm/snatpool/~Common~test-snat-pool?ver=12.1.3.7"
+        },
+        "type": "snat"
+      },
+      "sourcePort": "preserve",
+      "synCookieStatus": "not-activated",
+      "translateAddress": "enabled",
+      "translatePort": "enabled",
+      "vlansDisabled": true,
+      "vsIndex": 1442,
+      "rules": [
+        "/Common/test-irule1",
+        "/Common/test-irule2"
+      ],
+      "rulesReference": [
+        {
+          "link": "https://localhost/mgmt/tm/ltm/rule/~Common~test-irule1?ver=12.1.3.7"
+        },
+        {
+          "link": "https://localhost/mgmt/tm/ltm/rule/~Common~test-irule2?ver=12.1.3.7"
+        }
+      ],
+      "metadata": [
+        {
+          "name": "test-virtual2-meta",
+          "persist": "true",
+          "value": "meta"
+        },
+        {
+          "name": "test-virtual2-meta2",
+          "persist": "true",
+          "value": "meta2"
+        }
+      ],
+      "persist": [
+        {
+          "name": "source_addr",
+          "partition": "Common",
+          "tmDefault": "yes",
+          "nameReference": {
+            "link": "https://localhost/mgmt/tm/ltm/persistence/source-addr/~Common~source_addr?ver=12.1.3.7"
+          }
+        }
+      ],
+      "policiesReference": {
+        "link": "https://localhost/mgmt/tm/ltm/virtual/~Common~test-virtual2/policies?ver=12.1.3.7",
+        "isSubcollection": true
+      },
+      "profilesReference": {
+        "link": "https://localhost/mgmt/tm/ltm/virtual/~Common~test-virtual2/profiles?ver=12.1.3.7",
+        "isSubcollection": true
+      }
+    }
+  ]
+}`))
+	}
+
+	p, err := s.Client.VirtualServers()
+
+	assert.Nil(s.T(), err)
+	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s", uriLtm, uriVirtual), s.LastRequest.URL.Path)
+	assert.Equal(s.T(), "/Common/test-virtual", p.VirtualServers[0].FullPath)
+	assert.Equal(s.T(), "/Common/test-virtual2", p.VirtualServers[1].FullPath)
+
+	assert.Equal(s.T(), "test-virtual-meta", p.VirtualServers[0].Metadata[0].Name)
+	assert.Equal(s.T(), "meta2", p.VirtualServers[1].Metadata[1].Value)
 }
 
 func (s *LTMTestSuite) TestPools() {
@@ -862,6 +1093,31 @@ func (s *LTMTestSuite) TestModifyPoolMember() {
 	assert.Equal(s.T(), `{"monitor":"/Common/icmp"}`, s.LastRequestBody)
 }
 
+func (s *LTMTestSuite) TestUpdatePoolMembers() {
+	pool := "/Common/test-pool"
+	config := &[]PoolMember{
+		{
+			Name:      "test-pool-member:80",
+			Partition: "Common",
+			FullPath:  "/Common/test-pool-member:80",
+			Monitor:   "/Common/icmp",
+		},
+		{
+			Name:      "test-pool-member2:80",
+			Partition: "Common",
+			FullPath:  "/Common/test-pool-member2:80",
+			Monitor:   "/Common/icmp",
+		},
+	}
+
+	s.Client.UpdatePoolMembers(pool, config)
+
+	fmt.Println(s.LastRequest.URL)
+	assert.Equal(s.T(), "PATCH", s.LastRequest.Method)
+	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s/%s", uriLtm, uriPool, "~Common~test-pool"), s.LastRequest.URL.Path)
+	assert.Equal(s.T(), `{"members":[{"name":"test-pool-member:80","partition":"Common","fullPath":"/Common/test-pool-member:80","monitor":"/Common/icmp"},{"name":"test-pool-member2:80","partition":"Common","fullPath":"/Common/test-pool-member2:80","monitor":"/Common/icmp"}]}`, s.LastRequestBody)
+}
+
 func (s *LTMTestSuite) TestCreateMonitor() {
 	config := &Monitor{
 		Name:          "test-web-monitor",
@@ -1078,6 +1334,20 @@ func (s *LTMTestSuite) TestAddInternalDataGroup() {
 	assert.Equal(s.T(), `{"name":"test-datagroup","type":"string","records":[{"name":"name1","data":"data1"},{"name":"name2","data":"data2"}]}`, s.LastRequestBody)
 }
 
+func (s *LTMTestSuite) TestAddInternalDataGroup_emptyRecords() {
+	config := &DataGroup{
+		Name:    "test-datagroup",
+		Type:    "string",
+		Records: []DataGroupRecord{},
+	}
+
+	s.Client.AddInternalDataGroup(config)
+
+	assert.Equal(s.T(), "POST", s.LastRequest.Method)
+	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s/%s", uriLtm, uriDatagroup, uriInternal), s.LastRequest.URL.Path)
+	assert.Equal(s.T(), `{"name":"test-datagroup","type":"string","records":[]}`, s.LastRequestBody)
+}
+
 func (s *LTMTestSuite) TestModifyInternalDataGroupRecords() {
 	dataGroup := "test"
 
@@ -1097,6 +1367,18 @@ func (s *LTMTestSuite) TestModifyInternalDataGroupRecords() {
 	assert.Equal(s.T(), "PUT", s.LastRequest.Method)
 	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s/%s/%s", uriLtm, uriDatagroup, uriInternal, dataGroup), s.LastRequest.URL.Path)
 	assert.Equal(s.T(), `{"records":[{"name":"name1","data":"data1"},{"name":"name42","data":"data42"}]}`, s.LastRequestBody)
+}
+
+func (s *LTMTestSuite) TestModifyInternalDataGroupRecords_emptyRecords() {
+	dataGroup := "test"
+
+	records := &[]DataGroupRecord{}
+
+	s.Client.ModifyInternalDataGroupRecords(dataGroup, records)
+
+	assert.Equal(s.T(), "PUT", s.LastRequest.Method)
+	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s/%s/%s", uriLtm, uriDatagroup, uriInternal, dataGroup), s.LastRequest.URL.Path)
+	assert.Equal(s.T(), `{"records":[]}`, s.LastRequestBody)
 }
 
 func (s *LTMTestSuite) TestDeleteInternalDataGroup() {
@@ -1343,7 +1625,7 @@ func (s *LTMTestSuite) TestModifyServerSSLProfile() {
 
 	s.Client.ModifyServerSSLProfile(serverSSLProfile, myModifedServerSSLProfile)
 
-	assert.Equal(s.T(), "PUT", s.LastRequest.Method)
+	assert.Equal(s.T(), "PATCH", s.LastRequest.Method)
 	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s/%s/%s", uriLtm, uriProfile, uriServerSSL, serverSSLProfile), s.LastRequest.URL.Path)
 	assert.Equal(s.T(), `{"cert":"/Common/default.crt","key":"/Common/default.key","mode":"enabled","serverName":"myserver.contoso.com"}`, s.LastRequestBody)
 }
@@ -1599,7 +1881,7 @@ func (s *LTMTestSuite) TestModifyClientSSLProfile() {
 
 	s.Client.ModifyClientSSLProfile(clientSSLProfile, myModifedClientSSLProfile)
 
-	assert.Equal(s.T(), "PUT", s.LastRequest.Method)
+	assert.Equal(s.T(), "PATCH", s.LastRequest.Method)
 	assert.Equal(s.T(), fmt.Sprintf("/mgmt/tm/%s/%s/%s/%s", uriLtm, uriProfile, uriClientSSL, clientSSLProfile), s.LastRequest.URL.Path)
 	assert.Equal(s.T(), `{"cert":"/Common/default.crt","key":"/Common/default.key","mode":"enabled","serverName":"myserver.contoso.com"}`, s.LastRequestBody)
 }
